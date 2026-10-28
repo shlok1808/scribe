@@ -103,10 +103,11 @@ class ScribeServerApp(ServerApp):
             notebooks_path.mkdir(parents=True, exist_ok=True)
 
             # Verify we can write to the directory
-            test_file = notebooks_path / ".scribe_write_test"
+            # Use a per-process name so servers starting together don't race on one file
+            test_file = notebooks_path / f".scribe_write_test_{os.getpid()}"
             try:
                 test_file.write_text("test")
-                test_file.unlink()
+                test_file.unlink(missing_ok=True)
             except PermissionError:
                 raise ValueError(
                     f"No write permission for notebooks directory: {notebooks_path}"
